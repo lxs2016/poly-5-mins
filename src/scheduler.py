@@ -6,7 +6,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 import httpx
 
@@ -37,8 +37,8 @@ class Scheduler:
         self.data_dir = data_dir
         self.gamma_base = gamma_base
         self.ws_url = ws_url
-        self._current: MarketInfo | None = None
-        self._ws_task: asyncio.Task[None] | None = None
+        self._current: Optional[MarketInfo] = None
+        self._ws_task: Optional[asyncio.Task[None]] = None
         self._ws_stop = asyncio.Event()
 
     def get_current_slug(self) -> str:

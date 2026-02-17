@@ -7,7 +7,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional, Tuple
 
 import httpx
 
@@ -65,7 +65,7 @@ def _parse_end_date(market: dict[str, Any]) -> tuple[datetime, int]:
     return datetime.now(timezone.utc), 0
 
 
-def _event_to_market_info(event: dict[str, Any]) -> MarketInfo | None:
+def _event_to_market_info(event: dict[str, Any]) -> Optional[MarketInfo]:
     slug = event.get("slug") or ""
     if not slug.startswith(BTC_5M_SLUG_PREFIX):
         return None
@@ -136,14 +136,14 @@ async def get_current_and_next_btc_5m(
     limit: int = 80,
     retries: int = 3,
     retry_delay: float = 5.0,
-) -> tuple[MarketInfo | None, MarketInfo | None]:
+) -> Tuple[Optional[MarketInfo], Optional[MarketInfo]]:
     """
     Return (current_market, next_market) for BTC 5min.
     Current = nearest btc-updown-5m event that has not yet ended (smallest endDate in future).
     Next = the one after current, if any.
     Retries on connection/timeout errors.
     """
-    last_error: Exception | None = None
+    last_error: Optional[Exception] = None
     for attempt in range(max(1, retries)):
         try:
             async with httpx.AsyncClient(timeout=20.0) as client:
@@ -166,7 +166,7 @@ async def get_current_and_next_btc_5m(
     return None, None
 
 
-def get_event_by_slug_sync(slug: str, base_url: str = GAMMA_BASE) -> MarketInfo | None:
+def get_event_by_slug_sync(slug: str, base_url: str = GAMMA_BASE) -> Optional[MarketInfo]:
     """
     Fetch a single event by slug (e.g. btc-updown-5m-1771342500).
     Useful for way B: compute next window start_ts and request by slug.

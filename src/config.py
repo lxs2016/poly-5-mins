@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 try:
     import yaml
@@ -16,7 +16,7 @@ CONFIG_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATA_DIR = CONFIG_DIR / "data"
 
 
-def load_config(config_path: str | Path | None = None) -> dict[str, Any]:
+def load_config(config_path: Optional[Union[str, Path]] = None) -> dict[str, Any]:
     path = Path(config_path) if config_path else CONFIG_DIR / "config.yaml"
     out: dict[str, Any] = {
         "data_dir": str(DEFAULT_DATA_DIR),

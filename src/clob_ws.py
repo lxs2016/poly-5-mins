@@ -6,7 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable, Optional, Union
 
 import websockets
 from websockets.asyncio.client import ClientConnection
@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 # Callback types: (payload) -> None or await callback(payload)
-OnBook = Callable[[dict[str, Any]], Awaitable[None] | None]
-OnPriceChange = Callable[[dict[str, Any]], Awaitable[None] | None]
-OnTrade = Callable[[dict[str, Any]], Awaitable[None] | None]
+OnBook = Callable[[dict[str, Any]], Optional[Awaitable[None]]]
+OnPriceChange = Callable[[dict[str, Any]], Optional[Awaitable[None]]]
+OnTrade = Callable[[dict[str, Any]], Optional[Awaitable[None]]]
 
 
-async def _run_callback(cb: OnBook | OnPriceChange | OnTrade | None, payload: dict[str, Any]) -> None:
+async def _run_callback(cb: Optional[Union[OnBook, OnPriceChange, OnTrade]], payload: dict[str, Any]) -> None:
     if cb is None:
         return
     try:
@@ -34,7 +34,7 @@ async def _run_callback(cb: OnBook | OnPriceChange | OnTrade | None, payload: di
         logger.exception("Callback error: %s", e)
 
 
-def _parse_book(msg: dict[str, Any]) -> dict[str, Any] | None:
+def _parse_book(msg: dict[str, Any]) -> Optional[dict[str, Any]]:
     """Normalize book message: ensure bids/asks (doc sometimes says buys/sells)."""
     event = (msg.get("event_type") or msg.get("eventType") or "").lower()
     if event != "book":
@@ -52,7 +52,7 @@ def _parse_book(msg: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def _parse_price_change(msg: dict[str, Any]) -> dict[str, Any] | None:
+def _parse_price_change(msg: dict[str, Any]) -> Optional[dict[str, Any]]:
     event = (msg.get("event_type") or msg.get("eventType") or "").lower()
     if "price_change" not in event:
         return None
@@ -65,7 +65,7 @@ def _parse_price_change(msg: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def _parse_last_trade(msg: dict[str, Any]) -> dict[str, Any] | None:
+def _parse_last_trade(msg: dict[str, Any]) -> Optional[dict[str, Any]]:
     event = (msg.get("event_type") or msg.get("eventType") or "").lower()
     if "last_trade" not in event:
         return None
@@ -84,12 +84,12 @@ def _parse_last_trade(msg: dict[str, Any]) -> dict[str, Any] | None:
 async def run_ws(
     asset_ids: list[str],
     *,
-    on_book: OnBook | None = None,
-    on_price_change: OnPriceChange | None = None,
-    on_trade: OnTrade | None = None,
+    on_book: Optional[OnBook] = None,
+    on_price_change: Optional[OnPriceChange] = None,
+    on_trade: Optional[OnTrade] = None,
     url: str = WS_URL,
     ping_interval: float = PING_INTERVAL,
-    stop_event: asyncio.Event | None = None,
+    stop_event: Optional[asyncio.Event] = None,
 ) -> None:
     """
     Connect to CLOB market WebSocket, subscribe to asset_ids, and dispatch messages.

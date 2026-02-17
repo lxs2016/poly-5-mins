@@ -9,7 +9,7 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Union
 
 import pandas as pd
 
@@ -24,14 +24,14 @@ def _ensure_dir(p: Path) -> None:
 
 
 def save_market_meta(
-    data_dir: str | Path,
+    data_dir: Union[str, Path],
     slug: str,
     *,
     condition_id: str = "",
     end_date_utc_iso: str = "",
     end_date_ts_ms: int = 0,
-    token_ids: list[str] | None = None,
-    outcomes: list[str] | None = None,
+    token_ids: Optional[List[str]] = None,
+    outcomes: Optional[List[str]] = None,
 ) -> None:
     """Write one market metadata JSON to data_dir/markets/meta_{slug}.json."""
     root = Path(data_dir)
@@ -107,7 +107,7 @@ class OrderbookStorage:
 
     def __init__(
         self,
-        data_dir: str | Path,
+        data_dir: Union[str, Path],
         *,
         flush_interval: float = FLUSH_INTERVAL,
         flush_max_rows: int = FLUSH_MAX_ROWS,
@@ -118,7 +118,7 @@ class OrderbookStorage:
         self._snapshot_q: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
         self._tick_q: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
         self._trade_q: asyncio.Queue[dict[str, Any]] = asyncio.Queue()
-        self._writer_task: asyncio.Task[None] | None = None
+        self._writer_task: Optional[asyncio.Task[None]] = None
         self._stop = asyncio.Event()
 
     def enqueue_snapshot(self, slug: str, ts_ms: int, asset_id: str, market: str, bids: list, asks: list) -> None:
