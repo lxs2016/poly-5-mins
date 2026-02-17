@@ -1,0 +1,7 @@
+# Polymarket BTC 5min orderbook monitor
+data_dir: data
+log_level: INFO
+gamma_base_url: https://gamma-api.polymarket.com
+clob_ws_url: wss://ws-subscriptions-clob.polymarket.com/ws/market
+storage_flush_interval: 5.0
+storage_flush_max_rows: 200
