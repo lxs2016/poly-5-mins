@@ -12,6 +12,7 @@ import httpx
 
 from . import clob_ws
 from .gamma import MarketInfo, get_current_and_next_btc_5m
+from .realtime_arbitrage import RealtimeArbitrage
 from .storage import OrderbookStorage, save_market_meta
 
 logger = logging.getLogger(__name__)
@@ -32,11 +33,13 @@ class Scheduler:
         *,
         gamma_base: str = "https://gamma-api.polymarket.com",
         ws_url: str = clob_ws.WS_URL,
+        realtime_arbitrage: Optional[RealtimeArbitrage] = None,
     ):
         self.storage = storage
         self.data_dir = data_dir
         self.gamma_base = gamma_base
         self.ws_url = ws_url
+        self._realtime_arbitrage = realtime_arbitrage
         self._current: Optional[MarketInfo] = None
         self._ws_task: Optional[asyncio.Task[None]] = None
         self._ws_stop = asyncio.Event()
@@ -59,6 +62,14 @@ class Scheduler:
                 list(payload.get("bids") or []),
                 list(payload.get("asks") or []),
             )
+            if self._realtime_arbitrage is not None:
+                self._realtime_arbitrage.update_book(
+                    slug,
+                    ts_ms,
+                    str(payload.get("asset_id") or ""),
+                    list(payload.get("bids") or []),
+                    list(payload.get("asks") or []),
+                )
 
         return on_book
 
@@ -114,6 +125,8 @@ class Scheduler:
 
     def _switch_to(self, market: MarketInfo) -> None:
         self._current = market
+        if self._realtime_arbitrage is not None:
+            self._realtime_arbitrage.set_market(market)
         save_market_meta(
             self.data_dir,
             market.slug,

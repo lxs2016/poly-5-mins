@@ -1,0 +1,12 @@
+2026-02-17 17:24:53 [INFO] src.storage: Storage writer started
+2026-02-17 17:24:53 [INFO] src.realtime_arbitrage: RealtimeArbitrage sender started
+2026-02-17 17:24:53 [INFO] httpx: HTTP Request: GET https://gamma-api.polymarket.com/events?closed=false&limit=80&order=endDate&ascending=true&end_date_min=2026-02-17T17%3A24%3A53.000Z "HTTP/1.1 200 OK"
+2026-02-17 17:24:53 [INFO] src.storage: Saved market meta: data/markets/meta_btc-updown-5m-1771348800.json
+2026-02-17 17:24:53 [INFO] src.scheduler: Switched to market slug=btc-updown-5m-1771348800 endDate=2026-02-17T17:25:00+00:00 token_ids=['109861130038543994154553365203769050177426125683071298510071991418247079830271', '26853942177931886201757336755289682872943860044150497825685268669651915309817']
+2026-02-17 17:24:53 [INFO] src.scheduler: Sleeping 6s until endDate 2026-02-17T17:25:00+00:00
+2026-02-17 17:24:54 [INFO] src.clob_ws: Subscribed to 2 assets at wss://ws-subscriptions-clob.polymarket.com/ws/market
+2026-02-17 17:25:15 [INFO] httpx: HTTP Request: GET https://gamma-api.polymarket.com/events?closed=false&limit=80&order=endDate&ascending=true&end_date_min=2026-02-17T17%3A25%3A15.000Z "HTTP/1.1 200 OK"
+2026-02-17 17:25:15 [INFO] src.storage: Saved market meta: data/markets/meta_btc-updown-5m-1771349100.json
+2026-02-17 17:25:15 [INFO] src.scheduler: Switched to market slug=btc-updown-5m-1771349100 endDate=2026-02-17T17:30:00+00:00 token_ids=['92789208308131599077709989874377302181247120600395391560968737907535574169045', '44297235890900214390539488633426614678680768083917901653612271378053809496118']
+2026-02-17 17:25:15 [INFO] src.scheduler: Sleeping 285s until endDate 2026-02-17T17:30:00+00:00
+2026-02-17 17:25:15 [INFO] src.clob_ws: Subscribed to 2 assets at wss://ws-subscriptions-clob.polymarket.com/ws/market

@@ -5,3 +5,5 @@ gamma_base_url: https://gamma-api.polymarket.com
 clob_ws_url: wss://ws-subscriptions-clob.polymarket.com/ws/market
 storage_flush_interval: 5.0
 storage_flush_max_rows: 200
+# 套利信号发送到此 Discord webhook（也可用环境变量 DISCORD_WEBHOOK_URL 覆盖）
+discord_webhook_url: "https://discord.com/api/webhooks/1471024024598610042/9lq223eZAJ5kJ5otspXreNXjstW3nq7qj1dR9CM_PUlPfP9qMUCOTa4uM2Sdp2ddZx8S"

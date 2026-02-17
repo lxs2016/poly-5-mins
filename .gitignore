@@ -18,6 +18,5 @@ Thumbs.db
 *.swp
 *.swo
 
-# Data (orderbook snapshots/ticks, trades parquet)
-data/orderbook/
-data/trades/
+# Data (orderbook snapshots/ticks, trades, markets, etc.)
+data/

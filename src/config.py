@@ -25,6 +25,10 @@ def load_config(config_path: Optional[Union[str, Path]] = None) -> dict[str, Any
         "clob_ws_url": "wss://ws-subscriptions-clob.polymarket.com/ws/market",
         "storage_flush_interval": 5.0,
         "storage_flush_max_rows": 200,
+        "discord_webhook_url": "",
+        "arbitrage_buy_threshold": 0.99,
+        "arbitrage_sell_threshold": 1.01,
+        "arbitrage_discord_min_interval_sec": 30,
     }
     if path.exists() and yaml is not None:
         try:
@@ -38,13 +42,24 @@ def load_config(config_path: Optional[Union[str, Path]] = None) -> dict[str, Any
         "LOG_LEVEL": "log_level",
         "GAMMA_BASE_URL": "gamma_base_url",
         "CLOB_WS_URL": "clob_ws_url",
+        "DISCORD_WEBHOOK_URL": "discord_webhook_url",
+        "ARBITRAGE_BUY_THRESHOLD": "arbitrage_buy_threshold",
+        "ARBITRAGE_SELL_THRESHOLD": "arbitrage_sell_threshold",
+        "ARBITRAGE_DISCORD_MIN_INTERVAL_SEC": "arbitrage_discord_min_interval_sec",
     }
+    float_keys = {"arbitrage_buy_threshold", "arbitrage_sell_threshold"}
+    int_keys = {"storage_flush_max_rows", "arbitrage_discord_min_interval_sec"}
     for env_key, cfg_key in env_map.items():
         val = os.environ.get(env_key)
         if val is not None:
-            if cfg_key == "storage_flush_interval" or cfg_key == "storage_flush_max_rows":
+            if cfg_key in float_keys or cfg_key == "storage_flush_interval":
                 try:
-                    out[cfg_key] = float(val) if "interval" in cfg_key else int(val)
+                    out[cfg_key] = float(val)
+                except ValueError:
+                    pass
+            elif cfg_key in int_keys:
+                try:
+                    out[cfg_key] = int(val)
                 except ValueError:
                     pass
             else:
