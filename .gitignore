@@ -17,3 +17,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Data (orderbook snapshots/ticks, trades parquet)
+data/orderbook/
+data/trades/

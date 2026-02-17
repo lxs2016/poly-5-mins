@@ -4,6 +4,7 @@ Gamma API client: discover current and next BTC 5min up/down markets.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -39,11 +40,19 @@ def _parse_clob_token_ids(market: dict[str, Any]) -> list[str]:
     if raw is None:
         return []
     if isinstance(raw, list):
-        return [str(x) for x in raw]
+        return [str(x).strip() for x in raw]
     s = str(raw).strip()
     if not s:
         return []
-    return [x.strip() for x in s.split(",") if x.strip()]
+    # Gamma API 有时返回 JSON 字符串 "[\"id1\", \"id2\"]"，需解析而非按逗号分割
+    if s.startswith("[") and s.endswith("]"):
+        try:
+            parsed = json.loads(s)
+            if isinstance(parsed, list):
+                return [str(x).strip() for x in parsed]
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return [x.strip().strip('"') for x in s.split(",") if x.strip()]
 
 
 def _parse_end_date(market: dict[str, Any]) -> tuple[datetime, int]:
@@ -81,10 +90,20 @@ def _event_to_market_info(event: dict[str, Any]) -> Optional[MarketInfo]:
     end_dt, end_ts_ms = _parse_end_date(market)
     condition_id = (market.get("conditionId") or "").strip()
     outcomes_raw = market.get("outcomes") or market.get("shortOutcomes") or "Up,Down"
-    if isinstance(outcomes_raw, str):
-        outcomes = [x.strip() for x in outcomes_raw.split(",") if x.strip()]
+    if isinstance(outcomes_raw, list):
+        outcomes = [str(x).strip() for x in outcomes_raw]
+    elif isinstance(outcomes_raw, str):
+        s = outcomes_raw.strip()
+        if s.startswith("[") and s.endswith("]"):
+            try:
+                parsed = json.loads(s)
+                outcomes = [str(x).strip() for x in parsed] if isinstance(parsed, list) else [s]
+            except (json.JSONDecodeError, TypeError):
+                outcomes = [x.strip().strip('"') for x in s.split(",") if x.strip()]
+        else:
+            outcomes = [x.strip() for x in s.split(",") if x.strip()]
     else:
-        outcomes = list(outcomes_raw) if outcomes_raw else ["Up", "Down"]
+        outcomes = ["Up", "Down"]
     if len(outcomes) < 2:
         outcomes = ["Up", "Down"]
     return MarketInfo(
